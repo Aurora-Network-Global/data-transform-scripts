@@ -1,5 +1,5 @@
 from model.Altmetric import Altmetric
-from services import classifier_service, unpaywall_service
+from services import classifier_service, unpaywall_service, ubo_service
 from services import table_service
 
 if __name__ == '__main__':
@@ -13,6 +13,9 @@ if __name__ == '__main__':
     # initializing empty results list
     new_rows = []
     for index, row in table.iterrows():
+        if type(row['DOI'] is not float):
+            row['abstract'] = ubo_service.get_abstract(row['DOI'])
+
 
         # important: always set empty fields, if no values can be obtained! otherwise there are problems with the pandas
         # csv export
