@@ -1,5 +1,4 @@
 import os
-
 import pandas as pd
 
 
@@ -7,10 +6,18 @@ import pandas as pd
 input_excel_dateien = 'data/input/{}.xlsx'
 output_folder = 'data/output/'
 
+
 # Hier definieren wir auftretende Spaltennamen und deren Typ. object steht dabei für Text. Schreibweise und Groß-Klein-Schreibung sind wichtig.
-D_TYPES = {'Autoren': object,
-           'DOI': object
-           }
+D_TYPES = {'Title': object,
+           'Abstract': object,
+           'Publication type': object,
+           'DOI': object,
+           'ISBN': object,
+           'Other Identifier': object,
+           'Publication year': object,
+           'Author names': object,
+           'ORCID authors identifiers': object,
+           'Local Author identifiers': object}
 
 
 def read_excel_table(project, filename):
@@ -34,7 +41,7 @@ def write_excel_table(project, filename, rows, temp=False):
 
 def read_csv_file(project, filename):
     path_to_file = f'data/input/{project}/{filename}.csv'
-    table = pd.read_csv(path_to_file, dtype=D_TYPES)
+    table = pd.read_csv(path_to_file, dtype=D_TYPES, encoding='latin')  # TODO latin is test
     return table
 
 
@@ -43,8 +50,8 @@ def write_csv_file(project, filename, rows, temp=False):
         branch = 'test'
     else:
         branch = 'output'
-    if not os.path.exists(f'/data/{branch}/{project}'):
-        os.makedirs(f'/data/{branch}/{project}')
-    path_to_file = f'data/input/{project}/{filename}.csv'
+    if not os.path.exists(f'data/{branch}/{project}'):
+        os.makedirs(f'data/{branch}/{project}')
+    path_to_file = f'data/{branch}/{project}/{filename}.csv'
     new_table = pd.DataFrame(rows)
     new_table.to_csv(path_to_file, sep=',')
