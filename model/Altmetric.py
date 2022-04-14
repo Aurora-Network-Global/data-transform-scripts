@@ -10,7 +10,7 @@ class Altmetric:
     def __init__(self, doi):
 
         api_key = os.environ.get("ALTMETRIC_API_KEY")
-        secret = os.environ.get("ALTMETRIC_API_SECRET")
+        #secret = os.environ.get("ALTMETRIC_API_SECRET")
 
         self.altmetric_url = "https://api.altmetric.com/v1"
         self.api_key = api_key

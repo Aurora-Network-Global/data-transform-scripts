@@ -1,5 +1,4 @@
 import os
-
 import requests
 
 
@@ -48,7 +47,10 @@ class Unpaywall:
         The url of the free fulltext of the document.
         """
         try:
-            return self._json['free_fulltext_url']
+            if self._json['best_oa_location']:
+                return self._json['best_oa_location']['url']
+            else:
+                return False
         except KeyError:
             return None
         except AttributeError:
@@ -73,6 +75,18 @@ class Unpaywall:
         """
         try:
             return self._json['is_free_to_read']
+        except KeyError:
+            return None
+        except AttributeError:
+            return None
+
+    @property
+    def is_oa(self):
+        """
+        open access status
+        """
+        try:
+            return self._json['is_oa']
         except KeyError:
             return None
         except AttributeError:
@@ -108,7 +122,7 @@ class Unpaywall:
         The open access color of the document.
         """
         try:
-            return self._json['oa_color']
+            return self._json['oa_status']
         except KeyError:
             return None
         except AttributeError:
@@ -146,7 +160,7 @@ class Unpaywall:
         r = requests.get(url)
         print("queryied URL: " + url + " with status code " + str(r.status_code))
         if r.status_code == 200:
-            self._json = r.json()['results'][0]
+            self._json = r.json()
         else:
             print('no unpaywall data found')
 
