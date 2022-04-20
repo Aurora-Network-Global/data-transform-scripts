@@ -2,6 +2,7 @@ from model.Altmetric2 import Altmetric
 from model.Unpaywall import Unpaywall
 from services import classifier_service, ubo_service
 from services import table_service
+import config
 
 
 if __name__ == '__main__':
@@ -77,6 +78,15 @@ if __name__ == '__main__':
                                              'Mention type': mention_type,
                                              'Mention title': m.get('title', ''),
                                              'Mention author': m.get('author', {}).get('name', ''),
+                                             'Mention URL': m.get('url', '')
+                                             }
+                            altmetric_rows.append(altmetric_row)
+                    elif mention_type == 'patent':
+                        for m in mentions[mention_type]:
+                            altmetric_row = {'DOI': row['DOI'],
+                                             'Mention type': mention_type,
+                                             'Mention title': m.get('title', ''),
+                                             'Mention author': m.get('jurisdiction', ''),
                                              'Mention URL': m.get('url', '')
                                              }
                             altmetric_rows.append(altmetric_row)
