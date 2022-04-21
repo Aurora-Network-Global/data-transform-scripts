@@ -6,18 +6,8 @@ import pandas as pd
 input_excel_dateien = 'data/input/{}.xlsx'
 output_folder = 'data/output/'
 
-
-# Hier definieren wir auftretende Spaltennamen und deren Typ. object steht dabei für Text. Schreibweise und Groß-Klein-Schreibung sind wichtig.
-D_TYPES = {'Title': object,
-           'Abstract': object,
-           'Publication type': object,
-           'DOI': object,
-           'ISBN': object,
-           'Other Identifier': object,
-           'Publication year': object,
-           'Author names': object,
-           'ORCID authors identifiers': object,
-           'Local Author identifiers': object}
+# these columns we need for the API calls
+D_TYPES = {'DOI': object, 'ISBN': object}
 
 
 def read_excel_table(project, filename):
@@ -41,7 +31,7 @@ def write_excel_table(project, filename, rows, temp=False):
 
 def read_csv_file(project, filename):
     path_to_file = f'data/input/{project}/{filename}.csv'
-    table = pd.read_csv(path_to_file, dtype=D_TYPES, encoding='latin')  # TODO latin is test
+    table = pd.read_csv(path_to_file, dtype=D_TYPES)
     return table
 
 
@@ -54,4 +44,4 @@ def write_csv_file(project, filename, rows, temp=False):
         os.makedirs(f'data/{branch}/{project}')
     path_to_file = f'data/{branch}/{project}/{filename}.csv'
     new_table = pd.DataFrame(rows)
-    new_table.to_csv(path_to_file, sep=',')
+    new_table.to_csv(path_to_file, sep=',', index=False)

@@ -152,13 +152,7 @@ class Unpaywall:
         except AttributeError:
             return None
 
-    def __init__(self, doi):
-        email = os.environ.get("UNPAYWALL_EMAIL")
-        self._unpaywall_url = "https://api.unpaywall.org/my/request"
-        self._email = email
-        url = self._unpaywall_url + '/' + doi + "?email=" + self._email
-        r = requests.get(url)
-        print("queryied URL: " + url + " with status code " + str(r.status_code))
+    def __init__(self, r):
         if r.status_code == 200:
             self._json = r.json()
         else:
