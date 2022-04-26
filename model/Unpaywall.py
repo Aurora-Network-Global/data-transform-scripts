@@ -156,5 +156,5 @@ class Unpaywall:
         if r.status_code == 200:
             self._json = r.json()
         else:
-            print('no unpaywall data found')
+            pass
 

@@ -21,5 +21,5 @@ class Altmetric:
         if r.status_code == 200:
             self._json = r.json()
         else:
-            print('no altmetric data found')
+            pass
 

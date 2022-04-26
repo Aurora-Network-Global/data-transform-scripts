@@ -116,10 +116,10 @@ if __name__ == '__main__':
         for job in jobs:
             job.join()
         t1 = time.time()
-        print(f'it took {t1-t0} seconds to process {len(dois)} records')
+        print(f'it took {t1-t0} seconds to process {len(dois)} DOIs and {len(isbns)} ISBNs using the APIs')
         # save temp tables
-        table_service.write_csv_file(project=project, filename=filename + f'_unpaywall_{i}', rows=unpaywall_rows)
-        table_service.write_csv_file(project=project, filename=filename + f'_altmetric_{i}', rows=altmetric_rows)
+        table_service.write_csv_file(project=f'{project}/{filename}', filename=filename + f'_unpaywall_{i}', rows=unpaywall_rows)
+        table_service.write_csv_file(project=f'{project}/{filename}', filename=filename + f'_altmetric_{i}', rows=altmetric_rows)
         # reset the lists
         unpaywall_rows = []
         altmetric_rows = []
@@ -157,16 +157,16 @@ if __name__ == '__main__':
     for i in range(start * n, len(table), n):
         # dataframes are allowed to be empty
         try:
-            temp_table_upw = pd.read_csv(f'data/output/{project}/{filename}_unpaywall_{i}.csv')
+            temp_table_upw = pd.read_csv(f'data/output/{project}/{filename}/{filename}_unpaywall_{i}.csv')
             table_upw = pd.concat([table_upw, temp_table_upw])
         except pd.errors.EmptyDataError:
             pass
         try:
-            temp_table_alt = pd.read_csv(f'data/output/{project}/{filename}_altmetric_{i}.csv')
+            temp_table_alt = pd.read_csv(f'data/output/{project}/{filename}/{filename}_altmetric_{i}.csv')
             table_alt = pd.concat([table_alt, temp_table_alt])
         except pd.errors.EmptyDataError:
             pass
 
     # write results list to csv file
-    table_upw.to_csv(f'data/output/{project}/{filename + "_unpaywall"}.csv', index=False)
-    table_alt.to_csv(f'data/output/{project}/{filename + "_altmetric"}.csv', index=False)
+    table_upw.to_csv(f'data/output/{project}/{filename}/{filename + "_unpaywall"}.csv', index=False)
+    table_alt.to_csv(f'data/output/{project}/{filename}/{filename + "_altmetric"}.csv', index=False)
