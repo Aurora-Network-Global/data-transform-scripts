@@ -4,6 +4,7 @@ import time
 import sys
 from model.Altmetric2 import Altmetric
 from model.Unpaywall import Unpaywall
+from model.Scite import Scite
 from services import classifier_service, ubo_service
 from services import table_service
 from multiprocessing import Process
@@ -20,6 +21,26 @@ classification = False
 
 def parse_id(identifier):
     return identifier.split('|')[0].split(';')[0].strip().lower()
+
+
+def fast_scite(dois, scite_rows):
+    reqs = [{'id': doi,
+             'url': f'https://api.scite.ai/tallies/{doi}',
+             'params': {'email': email}}
+            for doi in dois]
+    rate_limit = (5, 1)
+    (results, message), elapsed = fast_get(reqs, accept_codes=[200, 404], max_retry=3, rate_limit=rate_limit)
+    # fill rows
+    for doi in results:
+        scite_row = {'ID': doi}
+        scite = Scite(results[doi])
+        scite_row['Total'] = scite.total
+        scite_row['Supporting'] = scite.supporting
+        scite_row['Contradicting'] = scite.contradicting
+        scite_row['Mentioning'] = scite.mentioning
+        scite_row['Unclassified'] = scite.unclassified
+        scite_row['Citing'] = scite.citingPublications
+        scite_rows.append(scite_row)
 
 
 def fast_unpaywall(dois, unpaywall_rows):
@@ -88,6 +109,7 @@ if __name__ == '__main__':
     sdg_rows = []
     unpaywall_rows = []
     altmetric_rows = []
+    scite_rows = []
 
     # reading in data from /data/input:
     table = table_service.read_csv_file(project=project, filename=filename)
@@ -112,6 +134,9 @@ if __name__ == '__main__':
         p2 = Process(target=fast_altmetric({'doi': dois, 'isbn': isbns}, altmetric_rows))
         jobs.append(p2)
         p2.start()
+        p3 = Process(target=fast_scite(dois+isbns, scite_rows))
+        jobs.append(p3)
+        p3.start()
         # wait for processes to finish
         for job in jobs:
             job.join()
@@ -120,9 +145,11 @@ if __name__ == '__main__':
         # save temp tables
         table_service.write_csv_file(project=f'{project}/{filename}', filename=filename + f'_unpaywall_{i}', rows=unpaywall_rows)
         table_service.write_csv_file(project=f'{project}/{filename}', filename=filename + f'_altmetric_{i}', rows=altmetric_rows)
+        table_service.write_csv_file(project=f'{project}/{filename}', filename=filename + f'_scite_{i}', rows=scite_rows)
         # reset the lists
         unpaywall_rows = []
         altmetric_rows = []
+        scite_rows = []
 
     # SDG classification (not in chunks)
     if classification:
@@ -154,6 +181,7 @@ if __name__ == '__main__':
     # append temp tables
     table_upw = pd.DataFrame()
     table_alt = pd.DataFrame()
+    table_scite = pd.DataFrame()
     for i in range(start * n, len(table), n):
         # dataframes are allowed to be empty
         try:
@@ -166,7 +194,13 @@ if __name__ == '__main__':
             table_alt = pd.concat([table_alt, temp_table_alt])
         except pd.errors.EmptyDataError:
             pass
+        try:
+            temp_table_scite = pd.read_csv(f'data/output/{project}/{filename}/{filename}_scite_{i}.csv')
+            table_scite = pd.concat([table_scite, temp_table_scite])
+        except pd.errors.EmptyDataError:
+            pass
 
     # write results list to csv file
     table_upw.to_csv(f'data/output/{project}/{filename}/{filename + "_unpaywall"}.csv', index=False)
     table_alt.to_csv(f'data/output/{project}/{filename}/{filename + "_altmetric"}.csv', index=False)
+    table_scite.to_csv(f'data/output/{project}/{filename}/{filename + "_scite"}.csv', index=False)
