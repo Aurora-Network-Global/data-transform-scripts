@@ -1,0 +1,3 @@
+
+EMAIL = ''
+ALTMETRIC_API_KEY = ''
